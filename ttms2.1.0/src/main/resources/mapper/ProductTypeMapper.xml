@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+classpath:mapper/ProjectMapper.xml
+ -->
+<mapper namespace="cn.tedu.ttms.product.dao.ProductTypeDao">
+	<!-- 
+	select c.*,(select name from tms_classes p where c.parentId=p.id)
+	from tms_classes c
+	 -->
+	 <!-- 
+	 select c.*,p.name parentName
+	from tms_classes  c left join tms_classes p
+	on c.parentId=p.id
+	类连接变为左外连接
+	  -->
+	<select id="findObjects" resultType="map">
+	select c.*,p.name parentName from tms_classes c left join tms_classes p
+	on c.parentId=p.id;
+	</select>
+	
+	<insert id="insertObject" parameterType="cn.tedu.ttms.product.entity.ProductType">
+	insert into tms_classes
+	(name,parentId,note,createdUser,modifiedUser,createdTime,modifiedTime)
+	values
+	(#{name},#{parentId},#{note},#{createdUser},#{modifiedUser},now(),now());	
+	</insert>
+	<!-- 查询zTree树中需要的节点信息 -->
+	<select id="findTreeNodes" resultType="map">
+		select id,name,parentId from tms_classes; 
+	</select>
+	
+	<update id="updateObject" 
+	parameterType="cn.tedu.ttms.product.entity.ProductType">
+		update tms_classes
+		set
+		name=#{name},
+		parentId=#{parentId},
+		sort=#{sort},
+		note=#{note},
+		modifiedUser=#{modifiedUser},
+		modifiedTime=NOW()
+		where id=#{id}
+	</update>
+	
+	<select id="findObjectById"	parameterType="java.lang.Integer" resultType="map">
+		select c.*,p.name parentName 
+		from tms_classes c left join tms_classes p on c.parentId=p.id 
+		where c.id=#{id}
+		<!-- 如果不用外连接，则查到的项只有id而没有parentId时就查不了，这时只能用左外连接，即外连接 -->
+<!-- 		where id=#{id} -->
+	</select>
+	<select id="hasChilds" resultType="java.lang.Integer">
+		select count(*) from tms_classes where parentId=#{id}
+	</select>
+	<delete id="deleteObjectById" parameterType="java.lang.Integer">
+		delete from tms_classes where id=#{id}
+	</delete>
+ 
+</mapper>

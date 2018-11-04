@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+classpath:mapper/ProjectMapper.xml
+ -->
+<mapper namespace="cn.tedu.ttms.team.dao.TeamDao">
+	 <select id="findPageObjects" resultType="map">
+ 		select t.*,p.name projectName
+ 		from tms_teams t join tms_projects p
+ 		on t.projectId=p.id
+ 		<where>
+     	<if test="projectName!=null and projectName!=''">
+     	 p.name like CONCAT ("%",#{projectName},"%")    	
+     	</if>
+     	<if test="valid!=null">
+     	 and t.valid=#{valid}
+     	</if>
+    	</where>   
+      ORDER BY createdTime desc 
+      limit #{startIndex},#{pageSize}
+ 	
+ </select>
+<!-- 插入项目信息 -->
+  <insert id="insertObject" 
+   parameterType="cn.tedu.ttms.team.entity.Teams">
+      INSERT INTO tms_teams
+      ( 
+      id,    
+      name,
+      projectId,
+      valid,
+      note,
+      createdUser,
+      modifiedUser,
+      createdTime,
+      modifiedTime
+      )
+      values(
+      #{id},
+      #{name},
+      #{projectId},
+      #{valid},
+      #{note},
+      #{createdUser},
+      #{modifiedUser},
+      NOW(),
+      NOW()
+      ) 
+  </insert>
+  
+  <select id="getRowCount" resultType="java.lang.Integer">
+  <!-- projectName 虽然之后没用到，但这里必须用到，以免覆盖name的值 -->
+    select count(*)
+ 	from tms_teams t join tms_projects p
+ 	on t.projectId=p.id
+ 	<where>
+     	<if test="projectName!=null and projectName!=''">
+     	 p.name like CONCAT ("%",#{projectName},"%")    	
+     	</if>
+     	<if test="valid!=null">
+     	 and t.valid=#{valid}
+     	</if>
+     </where>   
+     
+  </select>
+ 
+</mapper>
